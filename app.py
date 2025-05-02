@@ -42,8 +42,8 @@ class InferlessPythonModel:
         except ValueError:
             index = 0
 
-        thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-        content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
         
         generateObject = ResponseObjects(generated_result=content,thinking_hidden=thinking_content)
         return generateObject
