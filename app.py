@@ -10,6 +10,10 @@ from typing import Optional
 @inferless.request
 class RequestObjects(BaseModel):
     prompt: str = Field(default="Give me a short introduction to large language model.")
+    temperature: Optional[float] = 0.7
+    repetition_penalty: Optional[float] = 1.18
+    max_new_tokens: Optional[int] = 2048
+    
 
 @inferless.response
 class ResponseObjects(BaseModel):
@@ -30,7 +34,7 @@ class InferlessPythonModel:
         text = tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,enable_thinking=True)
         model_inputs = self.tokenizer([text], return_tensors="pt").to(model.device)
 
-        generated_ids = self.model.generate(**model_inputs,max_new_tokens=32768)
+        generated_ids = self.model.generate(**model_inputs,temperature=request.temperature, max_new_tokens=request.max_new_tokens, repetition_penalty=request.repetition_penalty)
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
 
         try:
@@ -41,7 +45,7 @@ class InferlessPythonModel:
         thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
         content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
         
-        generateObject = ResponseObjects(generated_result=content_text,thinking_hidden=thinking_text)
+        generateObject = ResponseObjects(generated_result=content,thinking_hidden=thinking_content)
         return generateObject
 
     def finalize(self):
