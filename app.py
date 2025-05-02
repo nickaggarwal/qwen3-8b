@@ -14,6 +14,7 @@ class RequestObjects(BaseModel):
 @inferless.response
 class ResponseObjects(BaseModel):
     generated_result: str = Field(default="Test output")
+    thinking_hidden: str = Field(default="Test output")
 
 class InferlessPythonModel:
     def initialize(self, context=None):
