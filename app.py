@@ -32,7 +32,7 @@ class InferlessPythonModel:
             {"role": "user", "content": request.prompt}
         ]
         text = self.tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,enable_thinking=True)
-        model_inputs = self.tokenizer([text], return_tensors="pt").to(model.device)
+        model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
 
         generated_ids = self.model.generate(**model_inputs,temperature=request.temperature, max_new_tokens=request.max_new_tokens, repetition_penalty=request.repetition_penalty)
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
