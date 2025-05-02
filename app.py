@@ -22,24 +22,25 @@ class InferlessPythonModel:
         snapshot_download(repo_id=self.model_id,allow_patterns=["*.safetensors"])
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,use_fast=True)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id,torch_dtype="auto",device_map="cuda")
-
-    def _build_chat_prompt(self, user_prompt: str) -> str:
-        messages = [{"role": "user", "content": user_prompt}]
-        return self.tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,enable_thinking=True)
         
     def infer(self, request: RequestObjects) -> ResponseObjects:
-        chat_prompt = self._build_chat_prompt(request.prompt)
-        model_inputs = self.tokenizer([chat_prompt],return_tensors="pt").to(self.model.device)
-        gen_ids = self.model.generate(**model_inputs,max_new_tokens=2048,temperature=0.7,do_sample=True)
-        
-        try:
-            cut = len(output_ids) - output_ids[::-1].index(151668)
-        except ValueError:
-            cut = 0
-        
-        thinking_text = self.tokenizer.decode(output_ids[:cut],skip_special_tokens=True).strip()
-        content_text = self.tokenizer.decode(output_ids[cut:],skip_special_tokens=True).strip()
+        messages = [
+            {"role": "user", "content": request.prompt}
+        ]
+        text = tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,enable_thinking=True)
+        model_inputs = self.tokenizer([text], return_tensors="pt").to(model.device)
 
+        generated_ids = self.model.generate(**model_inputs,max_new_tokens=32768)
+        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+
+        try:
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        thinking_content = tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        content = tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+        
         generateObject = ResponseObjects(generated_result=content_text,thinking_hidden=thinking_text)
         return generateObject
 
