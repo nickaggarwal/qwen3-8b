@@ -1,4 +1,4 @@
-# Tutorial - Deploy Qwen2.5-Omni-7B using Inferless
+# Tutorial - Deploy Qwen3-8B using Inferless
 [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B) is a state-of-the-art large language model from Alibaba's Qwen3 series,
 featuring 8.2 billion parameters and designed to excel in both complex reasoning tasks and efficient general-purpose dialogue.
 It uniquely supports seamless switching between "thinking" mode-for advanced math, coding, and logical inference-and "non-thinking" mode for fast,
