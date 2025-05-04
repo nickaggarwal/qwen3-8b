@@ -8,7 +8,7 @@ Qwen3-8B is fine-tuned for instruction following, creative writing, agent integr
 Its open-source availability and efficient performance make it an attractive choice for developers and researchers seeking a powerful, adaptable language model.
 
 ## TL;DR:
-- Deployment of Phi-4-Multimodal-Instruct model using [transformers](https://github.com/huggingface/transformers).
+- Deployment of Qwen3-8B model using [transformers](https://github.com/huggingface/transformers).
 - Dependencies defined in `inferless-runtime-config.yaml`.
 - GitHub/GitLab template creation with `app.py`, `inferless-runtime-config.yaml` and `inferless.yaml`.
 - Model class in `app.py` with `initialize`, `infer`, and `finalize` functions.
@@ -49,13 +49,7 @@ curl --location '<your_inference_url>' \
                   {
                         "name": "prompt",
                         "shape": [1],
-                        "data": ["Who are you?"],
-                        "datatype": "BYTES"
-                      },
-                      {
-                        "name": "system_prompt",
-                        "shape": [1],
-                        "data": ["You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech."],
+                        "data": ["Give me a short introduction to large language model."],
                         "datatype": "BYTES"
                       }
     ]
