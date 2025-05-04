@@ -22,10 +22,10 @@ class ResponseObjects(BaseModel):
 
 class InferlessPythonModel:
     def initialize(self, context=None):
-        self.model_id = "Qwen/Qwen3-8B"
-        snapshot_download(repo_id=self.model_id,allow_patterns=["*.safetensors"])
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,use_fast=True)
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_id,torch_dtype="auto",device_map="cuda")
+        model_id = "Qwen/Qwen3-8B"
+        snapshot_download(repo_id=model_id,allow_patterns=["*.safetensors"])
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id,use_fast=True)
+        self.model = AutoModelForCausalLM.from_pretrained(model_id,torch_dtype="auto",device_map="cuda")
         
     def infer(self, request: RequestObjects) -> ResponseObjects:
         messages = [
