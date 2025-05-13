@@ -1,52 +1,39 @@
-import os
-os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
-from huggingface_hub import snapshot_download
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
-import inferless
-from pydantic import BaseModel, Field
-from typing import Optional
-
-@inferless.request
-class RequestObjects(BaseModel):
-    prompt: str = Field(default="Give me a short introduction to large language model.")
-    temperature: Optional[float] = 0.7
-    repetition_penalty: Optional[float] = 1.18
-    max_new_tokens: Optional[int] = 2048
-    
-
-@inferless.response
-class ResponseObjects(BaseModel):
-    generated_result: str = Field(default="Test output")
-    thinking_hidden: str = Field(default="Test output")
+from vllm import LLM, SamplingParams
+import time
 
 class InferlessPythonModel:
-    def initialize(self, context=None):
-        model_id = "Qwen/Qwen3-32B"
-        snapshot_download(repo_id=model_id,allow_patterns=["*.safetensors"])
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id,use_fast=True)
-        self.model = AutoModelForCausalLM.from_pretrained(model_id,torch_dtype="auto",device_map="cuda")
-        
-    def infer(self, request: RequestObjects) -> ResponseObjects:
-        messages = [
-            {"role": "user", "content": request.prompt}
-        ]
-        text = self.tokenizer.apply_chat_template(messages,tokenize=False,add_generation_prompt=True,enable_thinking=True)
-        model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
-
-        generated_ids = self.model.generate(**model_inputs,temperature=request.temperature, max_new_tokens=request.max_new_tokens, repetition_penalty=request.repetition_penalty)
-        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
-
+    def initialize(self):
+        time.sleep(240)
         try:
-            index = len(output_ids) - output_ids[::-1].index(151668)
-        except ValueError:
-            index = 0
+            self.model = LLM(model="Qwen/Qwen3-8B", trust_remote_code=True)
+        except Exception as e:
+            print(f"Model initialization error: {e}")
+            raise
 
-        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
-        
-        generateObject = ResponseObjects(generated_result=content,thinking_hidden=thinking_content)
-        return generateObject
+    def infer(self, inputs):
+        prompt = inputs["prompt"]
+        min_tokens = int(inputs.get("min_tokens", 0))
+        max_tokens = int(inputs.get("max_tokens", 128))
+        temperature = float(inputs.get("temperature", 1.0))
+        top_p = float(inputs.get("top_p", 1.0))
+        top_k = int(inputs.get("top_k", 50))
+        repetition_penalty = float(inputs.get("repetition_penalty", 1.0))
+        params = SamplingParams(
+            min_tokens=min_tokens,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            top_k=top_k,
+            repetition_penalty=repetition_penalty,
+        )
+        outputs = self.model.generate(prompt, params)
+
+        result = prompt
+        for output in outputs:
+            result += output.outputs[0].text
+
+        return {"generated_text": result}
 
     def finalize(self):
         self.model = None
+
