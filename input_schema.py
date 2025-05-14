@@ -17,12 +17,6 @@ INPUT_SCHEMA = {
         'shape': [1],
         'example': [128]
     },
-    "temperature": {
-        'datatype': 'FP32',
-        'required': False,
-        'shape': [1],
-        'example': [1.0]
-    },
     "top_p": {
         'datatype': 'FP32',
         'required': False,
