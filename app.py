@@ -1,8 +1,8 @@
 import time
+from vllm import LLM, SamplingParams
 
 class InferlessPythonModel:
-    def initialize(self):
-        from vllm import LLM, SamplingParams
+    def initialize(self):        
         try:
             self.model = LLM(model="Qwen/Qwen3-8B", trust_remote_code=True)
         except Exception as e:
